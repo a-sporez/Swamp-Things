@@ -9,4 +9,4 @@ Things for the swamp.
 
 [Script](OBS_health_bar/healthBar.lua)
 
-[Instructions](OBS_health_bar/OBS_health_bar.md)
+[Instructions](OBS_health_bar/instructions.md)
