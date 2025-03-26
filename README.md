@@ -12,7 +12,7 @@ Things for the swamp.
 
 [instructions](OBS_plugins/tiny_single/instructions.md)
 
-- Duo Health Bar
+- OBS Dual Health Bar
 
 [sprite1](OBS_plugins/tiny_duo/sprites/health_player1.png)
 
