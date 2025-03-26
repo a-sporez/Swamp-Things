@@ -4,13 +4,13 @@
 
 ### 1. Add Your Health Bar Sprite Sheet
 - In OBS, add a new **Image Source** to your scene.
-- Name it something like: `HealthBarImage`
-- Set the image file to your **spritesheet** (`OBS_health_bar/sprites/element_blue01.png`).
+- Name it something like: `singleHealthBar`
+- Set the image file to your **spritesheet** (`sprites/health_blue01.png`).
 
 ---
 
 ### 2. Add a Crop Filter for Animation
-- Right-click the `HealthBarImage` source → **Filters**
+- Right-click the `HealthBar` source → **Filters**
 - Click the `+` under *Effect Filters* → choose **Crop/Pad**
 - **Name the filter** exactly: `HealthCrop` (must match your script)
 - Hit **Close** once added (you don’t need to manually set values — the script handles that)
@@ -19,9 +19,9 @@
 
 ### 3. Load the Script
 - In OBS: `Tools` → `Scripts`
-- Click the `+` → select the `healthBar.lua` file
+- Click the `+` → select the `singleHealthBar.lua` file
 - On the right side under the script’s name:
-  - Set **Source Name** to `HealthBarImage` (or whatever you named the image).
+  - Set **Source Name** to `singleHealthBar` (or whatever you named the image).
 
 ---
 

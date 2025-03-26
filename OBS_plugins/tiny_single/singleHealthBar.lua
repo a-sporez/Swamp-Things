@@ -8,8 +8,8 @@ obs = obslua
 source_name  = "" -- string
 health       = 16 -- current health (0 to 16)
 max_health   = 16 -- total frames (16 = full health)
-frame_width  = 710
-frame_height = 216
+frame_width  = 458
+frame_height = 35
 
 -- hotkey ID handles (OBS requires these to save/load)
 local increase_hotkey_id = nil
@@ -20,8 +20,8 @@ function updateCrop()
     local source = obs.obs_get_source_by_name(source_name)
     if source == nil then return end
 
-    local total_width = 710 * 17
-    local visible_width = 710
+    local total_width = 458 * 17
+    local visible_width = 458
     local crop_left = (max_health - health) * visible_width
     local crop_right = total_width - visible_width - crop_left
 
