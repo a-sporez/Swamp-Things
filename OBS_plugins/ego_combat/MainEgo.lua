@@ -1,4 +1,4 @@
--- Safely determine the script's own folder (cross-platform)
+-- Determine the script's own folder
 local script_path = debug.getinfo(1, "S").source
 if script_path:sub(1, 1) == "@" then
     script_path = script_path:sub(2)
