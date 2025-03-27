@@ -21,3 +21,7 @@ Things for the swamp.
 [script](OBS_plugins/tiny_duo/duoHealthBar.lua)
 
 [instructions](OBS_plugins/tiny_duo/instructions.md)
+
+### WORK IN PROGRESS
+
+[OOP File Structure and Combat System](OBS_plugins/ego_combat)
