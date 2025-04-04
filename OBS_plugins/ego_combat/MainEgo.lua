@@ -16,6 +16,7 @@ obs = obslua
 local healthBar = require 'healthBar'
 local egoCombat = require 'egoCombat'
 local gameState = require 'gameStateHandler'
+local auraMeter = require 'auraMeter'
 
 -- OBS main description
 function script_description()
@@ -26,22 +27,43 @@ end
 -- OBS UI properties (passed by healthBar.lua)
 function script_properties()
     local props = obs.obs_properties_create()
-    obs.obs_properties_add_text(props, "player1_source", "Player 1 Source", obs.OBS_TEXT_DEFAULT)
-    obs.obs_properties_add_text(props, "player2_source", "Player 2 Source", obs.OBS_TEXT_DEFAULT)
+
+    obs.obs_properties_add_text(props, "player1_health_source", "Player 1 Health Source", obs.OBS_TEXT_DEFAULT)
+    obs.obs_properties_add_text(props, "player1_aura_source", "Player 1 Aura Source", obs.OBS_TEXT_DEFAULT)
+
+    obs.obs_properties_add_text(props, "player2_health_source", "Player 2 Health Source", obs.OBS_TEXT_DEFAULT)
+    obs.obs_properties_add_text(props, "player2_aura_source", "Player 2 Aura Source", obs.OBS_TEXT_DEFAULT)
+
     return props
 end
 
 -- OBS UI update. (loop entry)
 function script_update(settings)
-    local p1_source = obs.obs_data_get_string(settings, 'player1_source')
-    local p2_source = obs.obs_data_get_string(settings, 'player2_source')
+    local p1_health = obs.obs_data_get_string(settings, 'player1_health_source')
+    local p1_aura   = obs.obs_data_get_string(settings, 'player1_aura_source')
+    local p2_health = obs.obs_data_get_string(settings, 'player2_health_source')
+    local p2_aura   = obs.obs_data_get_string(settings, 'player2_aura_source')
 
-    healthBar.setSourceName('player1', p1_source)
-    healthBar.setSourceName('player2', p2_source)
+    egoCombat.setPlayerSources(p1_health, p1_aura, p2_health, p2_aura)
 
     -- force visual refresh
-    healthBar.setHealthBar('player1', 16)
-    healthBar.setHealthBar('player2', 16)
+    local PlayerReg = require("playerRegistry") -- lazy-load to avoid top-level circular deps
+    local p1 = PlayerReg.get('player1')
+    local p2 = PlayerReg.get('player2')
+
+    if p1 then
+        healthBar.setHealthBar('player1', p1.hp)
+        auraMeter.setAuraMeter('player1', p1.ap)
+    end
+
+    if p2 then
+        healthBar.setHealthBar('player2', p2.hp)
+        auraMeter.setAuraMeter('player2', p2.ap)
+    end
+
+    if p1_health == "" or p1_aura == "" or p2_health == "" or p2_aura == "" then
+        print("[WARN]<MainEgo> One or more OBS sources are unset. Check script UI settings.")
+    end
 end
 
 -- OBS load (loop mark)
@@ -58,4 +80,13 @@ end
 -- OBS save (loop end)
 function script_save(settings)
     egoCombat.saveHotkeys(settings)
+end
+
+-- set default values.
+function script_defaults(settings)
+    obs.obs_data_set_default_string(settings, 'player1_health_source', 'Player1Health')
+    obs.obs_data_set_default_string(settings, 'player1_aura_source', 'Player1Aura')
+
+    obs.obs_data_set_default_string(settings, 'player2_health_source', 'Player2Health')
+    obs.obs_data_set_default_string(settings, 'player2_aura_source', 'Player2Aura')
 end

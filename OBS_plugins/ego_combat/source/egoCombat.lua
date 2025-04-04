@@ -1,68 +1,90 @@
--- Require the game state manager and the health bar system
 local GameState = require 'source.gameStateHandler'
 local HealthBar = require 'source.healthBar'
+local AuraMeter = require 'source.auraMeter'
+local PlayerReg = require 'source.playerRegistry'
 local obs = obslua
 
--- Main module table
 local EgoCombat = {}
 
--- Combatant data table: holds each player's current and max health
-local combatants = {
-    player1 = {id = 'player1', hp = 16, maxHp = 16},
-    player2 = {id = 'player2', hp = 16, maxHp = 16}
-}
-
--- Hotkey handles (OBS uses these to load/save bindings)
+-- Hotkey handles
 local hotkeys = {
     damageP1 = nil,
     damageP2 = nil,
     healP1   = nil,
-    healP2   = nil
+    healP2   = nil,
+    addAuraP1 = nil,
+    addAuraP2 = nil,
+    removeAuraP1 = nil,
+    removeAuraP2 = nil
 }
 
--- Called to begin a combat encounter
--- Sets the game state to "combat" and updates the health bar visuals
+-- Starts a combat encounter
 function EgoCombat.start()
     GameState.setState('combat')
     EgoCombat.updateVisuals()
 end
 
--- Applies damage to a target
--- Clamps HP to 0, checks for crash, then refreshes visuals
-function EgoCombat.damage(targetId, amount)
-    local target = combatants[targetId]
+-- Sets health + aura source names
+function EgoCombat.setPlayerSources(p1_health, p1_aura, p2_health, p2_aura)
+    PlayerReg.setSources('player1', p1_health, p1_aura)
+    PlayerReg.setSources('player2', p2_health, p2_aura)
+end
+
+-- Damage a target, then check for defeat
+function EgoCombat.damage(target_id, value)
+    local target = PlayerReg.get(target_id)
     if not target then return end
 
-    target.hp = math.max(0, target.hp - amount)
+    target.hp = math.max(0, target.hp - value)
+    EgoCombat.updateVisuals()
+
     if target.hp <= 0 then
         EgoCombat.crashOut()
     end
-
-    EgoCombat.updateVisuals()
 end
 
--- Applies healing to a target
--- Clamps HP to max and refreshes visuals
-function EgoCombat.heal(targetId, amount)
-    local target = combatants[targetId]
+-- Heal a target
+function EgoCombat.heal(target_id, value)
+    local target = PlayerReg.get(target_id)
     if not target then return end
 
-    target.hp = math.min(target.maxHp, target.hp + amount)
+    target.hp = math.min(target.max_hp, target.hp + value)
     EgoCombat.updateVisuals()
 end
 
--- Determines the winner and transitions game state
+-- Add aura
+function EgoCombat.gainAura(target_id, value)
+    local target = PlayerReg.get(target_id)
+    if not target then return end
+
+    target.ap = math.min(target.max_ap, (target.ap or 0) + value)
+    EgoCombat.updateVisuals()
+end
+
+-- Remove aura
+function EgoCombat.removeAura(target_id, value)
+    local target = PlayerReg.get(target_id)
+    if not target then return end
+
+    target.ap = math.max(0, target.ap - value)
+    EgoCombat.updateVisuals()
+end
+
+-- Check if someone won
 function EgoCombat.crashOut()
-    if combatants.player1.hp <= 0 then
+    local p1 = PlayerReg.get('player1')
+    local p2 = PlayerReg.get('player2')
+
+    if p1.hp <= 0 then
         GameState.setState('victoryPlayer2')
         print("[DEBUG]<EgoCombat> Player 2 Wins.")
-    elseif combatants.player2.hp <= 0 then
+    elseif p2.hp <= 0 then
         GameState.setState('victoryPlayer1')
         print("[DEBUG]<EgoCombat> Player 1 Wins.")
     end
 end
 
--- Registers hotkeys and their behavior
+-- Register all combat hotkeys
 function EgoCombat.bindHotkeys(settings)
     local function register(id, name, callback)
         hotkeys[id] = obs.obs_hotkey_register_frontend(id, name, callback)
@@ -74,7 +96,6 @@ function EgoCombat.bindHotkeys(settings)
     register('damageP1', "Damage Player 1", function(pressed)
         if pressed then EgoCombat.damage('player1', 1) end
     end)
-
     register('damageP2', "Damage Player 2", function(pressed)
         if pressed then EgoCombat.damage('player2', 1) end
     end)
@@ -82,13 +103,26 @@ function EgoCombat.bindHotkeys(settings)
     register('healP1', "Heal Player 1", function(pressed)
         if pressed then EgoCombat.heal('player1', 1) end
     end)
-
     register('healP2', "Heal Player 2", function(pressed)
         if pressed then EgoCombat.heal('player2', 1) end
     end)
+
+    register('addAuraP1', "Add Aura Player 1", function(pressed)
+        if pressed then EgoCombat.gainAura('player1', 1) end
+    end)
+    register('addAuraP2', "Add Aura Player 2", function(pressed)
+        if pressed then EgoCombat.gainAura('player2', 1) end
+    end)
+
+    register('removeAuraP1', "Remove Aura Player 1", function(pressed)
+        if pressed then EgoCombat.removeAura('player1', 1) end
+    end)
+    register('removeAuraP2', "Remove Aura Player 2", function(pressed)
+        if pressed then EgoCombat.removeAura('player2', 1) end
+    end)
 end
 
--- Saves all hotkey bindings
+-- Save hotkey bindings
 function EgoCombat.saveHotkeys(settings)
     for id, handle in pairs(hotkeys) do
         local keys = obs.obs_hotkey_save(handle)
@@ -97,16 +131,28 @@ function EgoCombat.saveHotkeys(settings)
     end
 end
 
--- Syncs all combatant health values with the visual health bars
+-- Update both players' visuals
 function EgoCombat.updateVisuals()
-    for id, entity in pairs(combatants) do
-        HealthBar.setHealthBar(id, entity.hp)
+    local p1 = PlayerReg.get('player1')
+    local p2 = PlayerReg.get('player2')
+
+    if p1 then
+        HealthBar.setHealthBar('player1', p1.hp)
+        AuraMeter.setAuraMeter('player1', p1.ap)
+    end
+
+    if p2 then
+        HealthBar.setHealthBar('player2', p2.hp)
+        AuraMeter.setAuraMeter('player2', p2.ap)
     end
 end
 
--- Returns the current combatant table (can be used for debugging or UI)
-function EgoCombat.getCombatants()
-    return combatants
+-- Return player data
+function EgoCombat.getChatters()
+    return {
+        player1 = PlayerReg.get('player1'),
+        player2 = PlayerReg.get('player2')
+    }
 end
 
 return EgoCombat
