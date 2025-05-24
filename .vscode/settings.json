@@ -1,5 +1,10 @@
 {
     "Lua.diagnostics.globals": [
         "obslua"
+    ],
+    "workbench.colorTheme": "Dark Lua",
+    "Lua.diagnostics.disable": [
+        "different-requires",
+        "lowercase-global"
     ]
 }

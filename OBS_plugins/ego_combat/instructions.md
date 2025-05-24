@@ -2,23 +2,25 @@
 
 ## 1. Add Image Sources to Your Scene
 
-1. In OBS, add **four image sources**:
+1. In OBS, add **eight image sources**:
    - `Player1Health`
    - `Player1Aura`
+   - `Player1Psy`
+   - `Player1Gut`
    - `Player2Health`
    - `Player2Aura`
-2. Set the correct sprtesheet as image for each.
+   - `Player2Psy`
+   - `Player2Gut`
+2. Set the correct spritesheet as image for each.
 
 ---
 
 ## 2. Add Crop Filters
 
-1. Right-click `Player1HealthBar` → **Filters**
+1. For each image source do: Right-click → **Filters**
 2. Click `+` under *Effect Filters* → select **Crop/Pad**
-3. Name it exactly: `HealthCrop`
-4. Repeat for `Player2Health`
-5. Repeat for `Player1Aura` and `Player2Aura`
-6. Close the filter windows — no need to adjust values (the script does that)
+3. Name it exactly (for each): `HealthCrop`, `AuraCrop`, `PsyCrop`, `GutCrop`
+4. Close the filter windows — no need to adjust values (the script does that)
 
 ---
 
@@ -34,11 +36,7 @@
 ## 4. Assign Hotkeys
 
 1. Go to `Settings > Hotkeys`
-2. Scroll down to find:
-   - **Damage Player 1**
-   - **Heal Player 1**
-   - **Increase Health – Player 2**
-   - **Decrease Health – Player 2**
+2. Scroll down to find the hotkeys declared by the script.
 3. Assign keys as desired.
 
 ---
