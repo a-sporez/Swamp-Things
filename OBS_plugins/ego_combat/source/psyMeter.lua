@@ -66,7 +66,7 @@ function PsyMeter.setPsyMeter(player_id, value)
 
     local old = player.psy or 0
     local new = math.max(0, math.min(player.max_psy, value))
-    player.ap = new
+    player.psy = new
 
     updateCrop(player_id)
     if new > old then

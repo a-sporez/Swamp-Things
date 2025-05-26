@@ -66,7 +66,7 @@ function GutMeter.setGutMeter(player_id, value)
 
     local old = player.gut or 0
     local new = math.max(0, math.min(player.max_gut, value))
-    player.ap = new
+    player.gut = new
 
     updateCrop(player_id)
     if new > old then

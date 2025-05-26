@@ -35,10 +35,24 @@ function EgoCombat.start()
     EgoCombat.updateVisuals()
 end
 
+
 -- Sets source names
-function EgoCombat.setPlayerSources(p1_health, p1_aura, p1_psy, p1_gut, p2_health, p2_aura, p2_psy, p2_gut)
+function EgoCombat.setPlayerSources(p1_health, p1_aura, p1_psy, p1_gut,
+                                    p2_health, p2_aura, p2_psy, p2_gut)
+    -- Update internal player state
     PlayerReg.setSources('player1', p1_health, p1_aura, p1_psy, p1_gut)
     PlayerReg.setSources('player2', p2_health, p2_aura, p2_psy, p2_gut)
+
+    -- Set source names in each visual meter
+    HealthBar.setSourceName('player1', p1_health)
+    AuraMeter.setSourceName('player1', p1_aura)
+    PsyMeter.setSourceName('player1', p1_psy)
+    GutMeter.setSourceName('player1', p1_gut)
+
+    HealthBar.setSourceName('player2', p2_health)
+    AuraMeter.setSourceName('player2', p2_aura)
+    PsyMeter.setSourceName('player2', p2_psy)
+    GutMeter.setSourceName('player2', p2_gut)
 end
 
 -- Damage a target, then check for defeat
